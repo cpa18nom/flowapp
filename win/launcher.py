@@ -98,7 +98,8 @@ def download(url: str, dst: Path, label: str) -> None:
                 last = time.time()
                 speed = got / max(last - t0, 0.1) / 1e6
                 pct = f"{got / total * 100:5.1f}%" if total else ""
-                print(f"\r  {label} {pct} {got / 1e6:,.0f}/{total / 1e6:,.0f}MB · {speed:.1f}MB/s   ", end="", flush=True)
+                size = f"{got / 1e6:,.0f}/{total / 1e6:,.0f}MB" if total else f"{got / 1e6:,.1f}MB"
+                print(f"\r  {label} {pct} {size} · {speed:.1f}MB/s   ", end="", flush=True)
     print()
     if total and got != total:
         tmp.unlink(missing_ok=True)
