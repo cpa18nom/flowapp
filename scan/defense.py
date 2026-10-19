@@ -25,9 +25,14 @@ _LOCK = threading.Lock()
 
 def compute(df: pd.DataFrame, stored) -> dict:
     """전 종목 {code: {beta, dfn, beta_pct, dfn_pct, liquid}} + 기준일. pct 는 유동 종목 안에서의 백분위(0~100)."""
-    d = df.loc[df.dt <= stored, ["dt", "Code", "ret", "val20"]]
-    days = np.sort(d.dt.unique())[-(WIN + 2):]
-    s = d[d.dt.isin(days)].assign(Code=lambda x: x.Code.astype(str))
+    # 마지막 WIN+2 거래일 행만 위치로 뗀다 — 전 구간을 불리언 .loc 로 거르면 pandas 가 600만 칸 행 번호(48MB)를 패널 인덱스에
+    # 캐시해 놓지 않는다(2026-10-19). 기준일까지의 마지막 날들이라 'stored 이하 · 그 첫날 이상' = 'days 안'이다.
+    dt = df.dt.to_numpy()
+    ok = dt <= np.datetime64(pd.Timestamp(stored))
+    days = np.sort(pd.unique(dt[ok]))[-(WIN + 2):]
+    pos = np.flatnonzero(ok & (dt >= days[0]))
+    s = pd.DataFrame({c: df[c].to_numpy()[pos] for c in ("dt", "ret", "val20")}).assign(
+        Code=np.asarray(df.Code.array.take(pos)).astype(str))[["dt", "Code", "ret", "val20"]]
     R = s.pivot(index="dt", columns="Code", values="ret").clip(-0.31, 0.31)
     L = s.pivot(index="dt", columns="Code", values="val20").reindex(columns=R.columns) >= LIQ
     Rl = R.where(L.shift(1, fill_value=False))

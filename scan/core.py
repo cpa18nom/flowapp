@@ -50,7 +50,7 @@ ALG_RECLAIM_WINDOW = 5
 STOCH_K, STOCH_DFAST, STOCH_DSLOW = 12, 26, 9   # 원본 기본값 (MACD 주기)
 
 # 지표 정의를 고치면 이 값을 올린다. 캐시 지문에 들어가 옛 패널이 자동 무효화된다.
-PANEL_VERSION = 21         # 21: crow_star 에 5·20·60일선 정배열(흑삼병 전날~당일) 조건(2026-10-16) · 20: crow_star(흑삼병 뒤 짧은 양봉·도지 + 주봉·월봉 오실레이터 — 사용자 그림 4, 2026-10-16) · 19: stairs_ready(계단식 매집 분출 전 수렴, 2026-10-15) · 18: stairs_break(계단식 매집봉 반복 뒤 1년 고점 돌파 — 사용자 그림 3, 2026-10-15) · 17: accum(매집 의심 — 세력 순매수·횡보·미분산·평단 근처, 2026-10-15) · 16: osd_vol(스토캐스틱 과매도·거래량·VWAP>MA60, indsetup 전 기간 1등, 2026-10-07) · 15: wave_collapse·spike_accum(사용자 그림 검색식, 2026-10-07) · 14: frgn5·orgn5(외국인·기관 5일 순매수 ÷ 거래량) + 수급 주식 수를 수정주가 기준으로 맞춤(flow_factor, 2026-10-05) · 13: ind_disp(개인 분산비율 — 수급 조건, winners.py 2026-10-04) · 12: bb40_break(상한선 대표가 40일·2σ 첫 돌파 — 식이형 전사본, 2026-10-04) · 11: osc_mtf(월봉·주봉 양봉 확대 + 일봉 양봉 전환, 2026-09-30) · 10: 오실레이터 양봉 상태·음봉 3칸 축소(osc_pos_d·osc_pos_w·osc_shrink3_d·osc_shrink3_w, 2026-09-30) · 9: 오실레이터 검색식(osc_shrink_d·osc_up_w·osc_shrink_w, 2026-09-30) · 8: turnover 에 marcap 꼬리 보정(2026-09-30) · 7: mom 열(승률형, 2026-09-30) · 6: bb_break·ema_div·kijun_pull·osc_ok(2026-09-30) · 5: sik_pullback·sik_center·sik_stop 열(2026-09-30) · 4: bottom_spike·turnover 열 추가(2026-09-29) · 3: dtype 압축 — 옛 캐시 무효화
+PANEL_VERSION = 22         # 22: 앱이 안 읽는 열(APP_SKIP)을 혼자 블록으로 — 앱이 복사 없이 지운다(2026-10-19) · 21: crow_star 에 5·20·60일선 정배열(흑삼병 전날~당일) 조건(2026-10-16) · 20: crow_star(흑삼병 뒤 짧은 양봉·도지 + 주봉·월봉 오실레이터 — 사용자 그림 4, 2026-10-16) · 19: stairs_ready(계단식 매집 분출 전 수렴, 2026-10-15) · 18: stairs_break(계단식 매집봉 반복 뒤 1년 고점 돌파 — 사용자 그림 3, 2026-10-15) · 17: accum(매집 의심 — 세력 순매수·횡보·미분산·평단 근처, 2026-10-15) · 16: osd_vol(스토캐스틱 과매도·거래량·VWAP>MA60, indsetup 전 기간 1등, 2026-10-07) · 15: wave_collapse·spike_accum(사용자 그림 검색식, 2026-10-07) · 14: frgn5·orgn5(외국인·기관 5일 순매수 ÷ 거래량) + 수급 주식 수를 수정주가 기준으로 맞춤(flow_factor, 2026-10-05) · 13: ind_disp(개인 분산비율 — 수급 조건, winners.py 2026-10-04) · 12: bb40_break(상한선 대표가 40일·2σ 첫 돌파 — 식이형 전사본, 2026-10-04) · 11: osc_mtf(월봉·주봉 양봉 확대 + 일봉 양봉 전환, 2026-09-30) · 10: 오실레이터 양봉 상태·음봉 3칸 축소(osc_pos_d·osc_pos_w·osc_shrink3_d·osc_shrink3_w, 2026-09-30) · 9: 오실레이터 검색식(osc_shrink_d·osc_up_w·osc_shrink_w, 2026-09-30) · 8: turnover 에 marcap 꼬리 보정(2026-09-30) · 7: mom 열(승률형, 2026-09-30) · 6: bb_break·ema_div·kijun_pull·osc_ok(2026-09-30) · 5: sik_pullback·sik_center·sik_stop 열(2026-09-30) · 4: bottom_spike·turnover 열 추가(2026-09-29) · 3: dtype 압축 — 옛 캐시 무효화
 
 COST_ROUNDTRIP_PCT = 0.4    # 증권거래세 0.18% + 슬리피지
 
@@ -1105,6 +1105,19 @@ _PANEL_COLS = ["dt", "Code", "open", "high", "low", "close", "volume", "ret", "v
                "osc_shrink_d", "osc_up_w", "osc_shrink_w", "osc_pos_d", "osc_pos_w", "osc_shrink3_d", "osc_shrink3_w", "osc_mtf",
                "cafe_juryeok", "algkkagi", "turnover", "bottom_spike", "sik_pullback", "sik_center", "sik_stop",
                "bb_break", "ema_div", "kijun_pull", "osc_ok", "bb40_break", "ind_disp", "frgn5", "orgn5", "wave_collapse", "spike_accum", "osd_vol", "accum", "stairs_break", "stairs_ready", "crow_star"]
+# 패널에는 있지만 화면(flowapp)은 읽지 않는 열 — 연구 스크립트(combo·winners 등)는 쓰므로 캐시에는 남기고 앱 메모리에서만 뺀다
+# (사용자 "본체 메모리 줄이기", 2026-10-19 — 일봉 기준 약 220MB). 화면이 이 중 하나를 쓰기 시작하면 여기서 빼야 한다.
+APP_SKIP = ("ma200", "hh20", "hh60", "hh120", "turnover", "sik_center", "sik_stop")
+
+
+def slim_for_app(d: pd.DataFrame) -> pd.DataFrame:
+    """앱이 읽지 않는 열(APP_SKIP)을 제자리에서 지운다. 캐시가 그 열들을 혼자 블록으로 담고 있어(_assemble) 다른 열은 복사되지 않는다."""
+    for c in APP_SKIP:
+        if c in d.columns:
+            d.pop(c)
+    return d
+
+
 PANEL_MIN_ROWS = 300       # 이보다 짧은 종목은 패널에 넣지 않는다(지표가 안 채워진다)
 
 
@@ -1333,7 +1346,7 @@ def _assemble(cols: list[str], buf: dict, cat) -> pd.DataFrame:
     n = next(iter(buf.values())).n
     groups: dict = {}
     for c in cols:
-        key = "cat" if c == "Code" else str(buf[c].a.dtype)
+        key = "cat" if c == "Code" else str(buf[c].a.dtype) + (f"|{c}" if c in APP_SKIP else "")   # 앱이 안 읽는 열은 혼자 블록 — 앱이 지울 때 큰 블록을 복사하지 않는다
         groups.setdefault(key, []).append(c)
     try:
         from pandas.core.internals import BlockManager
@@ -1344,7 +1357,7 @@ def _assemble(cols: list[str], buf: dict, cat) -> pd.DataFrame:
             if key == "cat":
                 blocks.append(make_block(pd.Categorical.from_codes(buf.pop(names[0]).done(), dtype=cat), placement=place))
                 continue
-            blk = np.empty((len(names), n), dtype=np.dtype(key))
+            blk = np.empty((len(names), n), dtype=np.dtype(key.split("|")[0]))
             for i, c in enumerate(names):
                 blk[i] = buf.pop(c).done()
             blocks.append(make_block(blk, placement=place))
@@ -1696,7 +1709,16 @@ def _narrow(full: pd.DataFrame, cols, pos: np.ndarray) -> pd.DataFrame:
     full 에 없는 열은 건너뛴다 — 그 열이 정말 필요한 검색식이면 make_signal 이 KeyError 로 알린다."""
     def cut(s: pd.Series):                  # 범주형(Code)은 범주형 그대로 — to_numpy 는 문자열 객체 배열로 풀어 버린다
         return s.array.take(pos) if isinstance(s.dtype, pd.CategoricalDtype) else s.to_numpy()[pos]
-    return pd.DataFrame({c: cut(full[c]) for c in dict.fromkeys(cols) if c in full.columns}, index=full.index[pos])
+    return pd.DataFrame({c: cut(full[c]) for c in dict.fromkeys(cols) if c in full.columns}, index=row_labels(full, pos))
+
+
+def row_labels(full: pd.DataFrame, pos: np.ndarray) -> pd.Index:
+    """full 의 pos 행 라벨. 패널은 RangeIndex 라 계산으로 낸다 — full.index[pos] 는 pandas 가 600만 칸짜리 행 번호 배열(48MB)을
+    만들어 패널 인덱스에 **캐시해 두고 놓지 않는다**(2026-10-19 실측, 검색 한 번에 상주 +48MB)."""
+    ix = full.index
+    if isinstance(ix, pd.RangeIndex):
+        return pd.Index(ix.start + np.asarray(pos, dtype=np.int64) * ix.step)
+    return ix[pos]
 
 
 def liquid_up_days(full: pd.DataFrame, min_val: float) -> pd.Series:
@@ -1762,7 +1784,10 @@ def panel_arrays(full: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     forward_return 은 부를 때마다 600만 행을 factorize 한다(4개 기간에 0.07초)."""
     if not isinstance(full.index, pd.RangeIndex) or full.index.start != 0 or full.index.step != 1:
         raise ValueError("full 은 0 부터 시작하는 RangeIndex 패널이어야 한다")
-    return pd.factorize(full.Code)[0], full.close.to_numpy(dtype=float)
+    # 범주 번호(int16)·패널 종가 dtype(int32) 그대로 — factorize(int64)·float64 사본(97MB)을 상주시키지 않는다(2026-10-19).
+    # forward_close 는 번호를 같은지만 보고, 종가는 고른 칸만 float 로 바뀐다(int32 → float64 는 정확하다).
+    codes = full.Code.cat.codes.to_numpy() if isinstance(full.Code.dtype, pd.CategoricalDtype) else pd.factorize(full.Code)[0]
+    return codes, full.close.to_numpy()
 
 
 def forward_close(arrays: tuple[np.ndarray, np.ndarray], index, horizon: int) -> np.ndarray:

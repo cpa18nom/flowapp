@@ -146,7 +146,7 @@ def panel(tf: str | None = None):
             t = time.time()
             print(f"  {core.TFS[tf]} 패널 만드는 중…", file=sys.stderr, flush=True)
             core.ensure_panel_cache(tf=tf)          # 없으면 자식 프로세스가 만든다(앱 메모리 보호)
-            P["df"] = core.build_panel(tf=tf)       # 캐시를 읽기만 한다
+            P["df"] = core.slim_for_app(core.build_panel(tf=tf))       # 캐시를 읽기만 한다 · 화면이 안 읽는 열은 메모리에서 뺀다
             P["at"] = time.time()
             P["stored"] = P["df"].dt.max()          # 저장 자료의 마지막 봉(오늘 봉을 붙이기 전)
             print(f"  준비 완료 {time.time()-t:.0f}초 · "
@@ -185,6 +185,23 @@ def release_memory() -> None:
     try:
         ctypes.CDLL("libc.so.6").malloc_trim(0)
     except OSError:                                 # glibc 가 아닌 환경(맥 등) — 조용히 넘어간다
+        pass
+
+
+def tune_malloc() -> None:
+    """glibc 가 놓은 큰 배열을 쥐고 있지 않게 한다(리눅스만, 서버 시작 때 한 번). 2026-10-19 실측:
+    큰 배열(≥128KB)은 mmap 으로 받았다가 놓으면 바로 OS 로 돌아가야 하는데, glibc 는 mmap 덩어리를 한 번 놓을 때마다
+    그 크기까지 기준을 올려(동적 임계값) 다음부터는 힙에서 준다 → 검색 뒤 차트 신호일 미리 계산(수백 MB 임시)이 끝나도
+    상주가 +250MB 남았다. 기준을 128KB 로 고정하면 동적 조정이 꺼진다. 요청마다 스레드가 새로 떠 아레나도 2개로 묶는다.
+    검색 화면 → 종목 화면 2개 순서에서 1,443 → 985MB(같은 결과 · 같은 속도)."""
+    if not sys.platform.startswith("linux"):
+        return
+    import ctypes
+    try:
+        libc = ctypes.CDLL("libc.so.6")
+        libc.mallopt(-3, 128 * 1024)       # M_MMAP_THRESHOLD
+        libc.mallopt(-8, 2)                # M_ARENA_MAX
+    except (OSError, AttributeError):
         pass
 
 
@@ -812,9 +829,24 @@ def full_mask(o: dict):
 def signal_dates(o: dict, code: str) -> list:
     """한 종목의 신호 발생일(날짜순). 화면의 검색 결과와 같은 정의(같은 유동성·같은 설정)."""
     p, m = panel(), full_mask(o)
-    rows = derived("rows", lambda p: {str(c): i for c, i in p.groupby("Code", observed=True, sort=False).indices.items()})
-    i = rows.get(code)
-    return [] if i is None else list(pd.to_datetime(p.dt.to_numpy()[i[m[i]]]))
+    rows = derived("rows", code_spans)
+    s = rows.get(code)
+    if s is None:
+        return []
+    i = np.arange(*s) if isinstance(s, tuple) else s
+    return list(pd.to_datetime(p.dt.to_numpy()[i[m[i]]]))
+
+
+def code_spans(p: pd.DataFrame) -> dict:
+    """종목 → 그 종목 행의 (시작, 끝) 위치. 패널은 종목별로 행이 붙어 있어 구간 하나로 충분하다 — 종목별 위치 배열(600만 칸, 48MB)을
+    상주시키지 않는다(2026-10-19). 붙어 있지 않으면(그럴 일 없지만) 예전처럼 위치 배열로."""
+    codes = p.Code.cat.codes.to_numpy()
+    start = np.flatnonzero(np.r_[True, codes[1:] != codes[:-1]])
+    if len(start) != len(np.unique(codes)):
+        return {str(c): i for c, i in p.groupby("Code", observed=True, sort=False).indices.items()}
+    end = np.r_[start[1:], len(codes)]
+    cats = p.Code.cat.categories
+    return {str(cats[codes[s]]): (int(s), int(e)) for s, e in zip(start, end)}
 
 
 def label_of(kind: str, tf: str = "d") -> str:
@@ -3265,6 +3297,7 @@ def main() -> None:
     global LIVE_ON
     LIVE_ON = os.environ.get("FLOWAPP_LIVE", "1") != "0"     # 오늘 봉(잠정) 붙이기 — 끄려면 FLOWAPP_LIVE=0
     appsettings.apply_env()            # 윈도우 배포판: 설정 화면에 저장한 DART·Anthropic 키
+    tune_malloc()                      # 패널을 읽기 전에 — 놓은 큰 배열이 OS 로 돌아가게
     panel()                            # 첫 요청이 30초 걸리지 않도록 미리 만든다
     threading.Thread(target=board.data, daemon=True).start()       # 전광판 집계(수 초)를 첫 화면 전에 미리
     srv = ThreadingHTTPServer((a.host, a.port), Handler)
