@@ -13,3 +13,6 @@
 ## 개발자용
 - `scan/` `bin/` 은 정본 저장소에서 `tools/sync.sh` 로 복사한 것 — 여기서 직접 고치지 않는다.
 - `tools/build_win.sh` 배포 압축본 · `tools/make_data.sh` 데이터 묶음 · `tools/publish.sh` 동기화→커밋→푸시.
+
+## 바뀐 내용
+- 2026-10-19 v1.0 첫 배포
